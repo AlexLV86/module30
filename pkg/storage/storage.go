@@ -140,3 +140,13 @@ func (s *Storage) NewTask(t Task) (int, error) {
 	).Scan(&id)
 	return id, err
 }
+
+// DeleteTask удаляет задачу и возвращает ошибку .
+func (s *Storage) DeleteTask(id int) error {
+	_, err := s.db.Exec(context.Background(), `
+		DELETE FROM tasks WHERE id=$1;
+		`,
+		id,
+	)
+	return err
+}

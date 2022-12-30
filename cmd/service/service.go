@@ -18,7 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tasks, err := db.Tasks(0, 0)
+	tasks, err := db.Tasks(0, -1)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -28,4 +28,9 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(users)
+	taskid := 2
+	err = db.DeleteTask(taskid)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
