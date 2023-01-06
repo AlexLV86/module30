@@ -13,8 +13,7 @@ func main() {
 	if pwd == "" {
 		os.Exit(1)
 	}
-	fmt.Println("Password: ", pwd)
-	db, err := storage.New("postgres://postgres:1234@192.168.1.62:/tasks")
+	db, err := storage.New("postgres://postgres:" + pwd + "@192.168.1.62:/tasks")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,14 +22,18 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(tasks)
-	users, err := db.Users(0)
+	err = db.DeleteTask(1)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(users)
-	taskid := 2
-	err = db.DeleteTask(taskid)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// users, err := db.Users(0)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(users)
+	// taskid := 2
+	// err = db.DeleteTask(taskid)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 }

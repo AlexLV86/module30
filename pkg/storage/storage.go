@@ -82,24 +82,10 @@ func (s *Storage) Users(userID int) ([]User, error) {
 // Tasks возвращает список задач из БД.
 // Значение -1 вернет все задачи или всех авторов
 func (s *Storage) Tasks(taskID, authorID int) ([]Task, error) {
-	rows, err := s.db.Query(context.Background(), `
-		SELECT 
-			id,
-			opened,
-			closed,
-			author_id,
-			assigned_id,
-			title,
-			content
-		FROM tasks
-		WHERE
-			($1 = 0 OR id = $1) AND
-			($2 = -1 OR author_id = $2)
-		ORDER BY id;
-	`,
-		taskID,
-		authorID,
-	)
+	query := `SELECT tasks.id, tasks.opened, tasks.closed, tasks.author_id,
+	tasks.assigned_id, tasks.title, tasks.content FROM tasks
+	WHERE ($1 = 0 OR id = $1) AND ($2 = -1 OR author_id = $2) ORDER BY id;`
+	rows, err := s.db.Query(context.Background(), query, taskID, authorID)
 	if err != nil {
 		return nil, err
 	}
