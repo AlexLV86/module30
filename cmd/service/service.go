@@ -22,6 +22,11 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(tasks)
+	tasks, err = db.TasksLabels("git")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(tasks)
 	err = db.DeleteTask(1)
 	if err != nil {
 		log.Fatal(err)

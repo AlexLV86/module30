@@ -114,6 +114,42 @@ func (s *Storage) Tasks(taskID, authorID int) ([]Task, error) {
 	return tasks, rows.Err()
 }
 
+// Tasks возвращает список задач из БД.
+// Значение -1 вернет все задачи или всех авторов
+func (s *Storage) TasksLabels(labelName string) ([]Task, error) {
+	query := `SELECT tasks.id, tasks.opened, tasks.closed, tasks.author_id,
+	tasks.assigned_id, tasks.title, tasks.content 
+	FROM tasks, labels, tasks_labels
+	WHERE labels.name=$1 AND tasks.id=tasks_labels.task_id
+	AND labels.id=tasks_labels.label_id;`
+	rows, err := s.db.Query(context.Background(), query, labelName)
+	if err != nil {
+		return nil, err
+	}
+	var tasks []Task
+	// итерирование по результату выполнения запроса
+	// и сканирование каждой строки в переменную
+	for rows.Next() {
+		var t Task
+		err = rows.Scan(
+			&t.ID,
+			&t.Opened,
+			&t.Closed,
+			&t.AuthorID,
+			&t.AssignedID,
+			&t.Title,
+			&t.Content,
+		)
+		if err != nil {
+			return nil, err
+		}
+		// добавление переменной в массив результатов
+		tasks = append(tasks, t)
+	}
+	// ВАЖНО не забыть проверить rows.Err()
+	return tasks, rows.Err()
+}
+
 // NewTask создаёт новую задачу и возвращает её id.
 func (s *Storage) NewTask(t Task) (int, error) {
 	var id int
