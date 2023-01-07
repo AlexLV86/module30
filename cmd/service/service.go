@@ -17,20 +17,30 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = db.UpdateTask(15, "Ok schema12122", "Prosto1212", 12312)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// task := storage.Task{Title: "New task", Content: "New task and solve"}
+	// id, err := db.NewTask(task)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	//fmt.Println("New id: ", id)
 	tasks, err := db.Tasks(0, -1)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(tasks)
-	tasks, err = db.TasksLabels("git")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(tasks)
-	err = db.DeleteTask(1)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// tasks, err = db.TasksLabels("git")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(tasks)
+	// err = db.DeleteTask(1)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 	// users, err := db.Users(0)
 	// if err != nil {
 	// 	log.Fatal(err)

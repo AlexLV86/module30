@@ -2,6 +2,8 @@ package storage
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -25,16 +27,13 @@ func New(constr string) (*Storage, error) {
 
 // Задача.
 type Task struct {
-	ID           int
-	Opened       int64
-	Closed       int64
-	AuthorID     int
-	AssignedID   int
-	Title        string
-	Content      string
-	AuthorName   string
-	AssignedName string
-	Labels       []string
+	ID         int
+	Opened     int64
+	Closed     int64
+	AuthorID   int
+	AssignedID int
+	Title      string
+	Content    string
 }
 
 // Пользователь
@@ -73,14 +72,14 @@ func (s *Storage) Users(userID int) ([]User, error) {
 		}
 		// добавление переменной в массив результатов
 		users = append(users, u)
-
 	}
 	// ВАЖНО не забыть проверить rows.Err()
 	return users, rows.Err()
 }
 
 // Tasks возвращает список задач из БД.
-// Значение -1 вернет все задачи или всех авторов
+// Значение taskID 0 вернет вернет все задачи
+// Значение authorID -1 вернет задачи с любым автором
 func (s *Storage) Tasks(taskID, authorID int) ([]Task, error) {
 	query := `SELECT tasks.id, tasks.opened, tasks.closed, tasks.author_id,
 	tasks.assigned_id, tasks.title, tasks.content FROM tasks
@@ -163,12 +162,45 @@ func (s *Storage) NewTask(t Task) (int, error) {
 	return id, err
 }
 
-// DeleteTask удаляет задачу и возвращает ошибку .
+// DeleteTask удаляет задачу и возвращает ошибку.
 func (s *Storage) DeleteTask(id int) error {
 	_, err := s.db.Exec(context.Background(), `
 		DELETE FROM tasks WHERE id=$1;
 		`,
 		id,
 	)
+	return err
+}
+
+// UpdateTask обновляет задачу по id и возвращает ошибку.
+// Строковые переменные пустые, числа -1 значение столбца не обновляется.
+func (s *Storage) UpdateTask(id int, title string, content string, closed int64) error {
+	var values []interface{}
+	values = append(values, id)
+	set := ""
+	i := 1
+	if title != "" {
+		i++
+		set += "title=$" + strconv.Itoa(i) + ","
+		values = append(values, title)
+	}
+	if closed != -1 {
+		i++
+		set += "closed=$" + strconv.Itoa(i) + ","
+		values = append(values, closed)
+	}
+	if content != "" {
+		i++
+		set += "content=$" + strconv.Itoa(i) + ","
+		values = append(values, content)
+	}
+	// не переданы значения для обновления
+	if set == "" {
+		return fmt.Errorf("empty data")
+	}
+	// убирает последнюю запятую
+	set = set[:len(set)-1]
+	query := "UPDATE tasks SET " + set + "WHERE id=$1;"
+	_, err := s.db.Exec(context.Background(), query, values...)
 	return err
 }
